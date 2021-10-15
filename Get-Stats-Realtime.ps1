@@ -1,21 +1,22 @@
 <#
  .Synopsis
-  Collect and export vSphere realtime statistitcs over a user defined Period of time.
+  Collect and export vSphere realtime statistitcs over a user defined period of time.
 
  .Description
   Export vSphere realtime statistitcs over a user defined Period of time. This function 
   builds upon the functionality of the PowerCLI "Get-Stat" Cmdlet. By default, real-time 
   statistics are collected every 20 seconds for the last 60-minutes. This data is stored
   in a circular buffer and as new data is collected, the oldest data is overwritten. 
-  This function exports the realtime statistics to a comma seperate file (CSV) every 
-  Period for a specified Duration. Realtime statistics include memory, cpu, disk, and 
-  network.
+  This function exports timestamped realtime statistics to a comma seperated file (CSV) 
+  every   period for a specified duration. Realtime statistics include memory, cpu, disk,
+  and network.
 
  .Parameter Entity
   Fully qualified domain name (FQDN) or IP address of a vSphere host.
 
  .Parameter Path
-  The file Path where results are exported. File Path assumes a Microsoft Windows client.
+  The file path where results are exported. The file path must exist and assumes a 
+  Microsoft Windows operating system. 
 
  .Parameter Duration
   The length of time in seconds the function should run.
@@ -27,6 +28,9 @@
  .Example
    # Collect realtime statistics from the vSphere host "vmhost.example.com" every 45 minutes 
    for 2 hours and export to the "C:\stats" file path.
+
+   # Load the function
+   Import-Module .\Get-Stats-Realtime.ps1
    Get-Stats-Realtime -Entity vmhost.example.com -Path C:\stats -Duration 7200 -Period 2700
 #>
 function Get-Stats-Realtime {
