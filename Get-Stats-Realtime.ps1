@@ -26,11 +26,13 @@
   between 0-3600 seconds to maintain contigiuous data sets.
 
  .Example
+   # Load the function
+
+   Import-Module .\Get-Stats-Realtime.ps1
+   
    # Collect realtime statistics from the vSphere host "vmhost.example.com" every 45 minutes 
    for 2 hours and export to the "C:\stats" file path.
 
-   # Load the function
-   Import-Module .\Get-Stats-Realtime.ps1
    Get-Stats-Realtime -Entity vmhost.example.com -Path C:\stats -Duration 7200 -Period 2700
 #>
 function Get-Stats-Realtime {
@@ -51,7 +53,7 @@ function Get-Stats-Realtime {
     } # End function status
 
     # Start the loop and end when elapsed time is greater than the duation
-    $elasped=0
+    $elapsed=0
     while ($elapsed -lt ($Duration + 1)) {
 
         # Subtract the Period from the current time to identify start range of time to retrieve stats
