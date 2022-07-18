@@ -63,7 +63,7 @@ function Get-Stats-Realtime {
         Status "Getting Realtime Stats" "$start $Entity"
         Status "Status" "$elapsed/$Duration elapsed/Duration in seconds"
         # Retrieve all statistics
-        $stats = Get-Stat -Entity $Entity -Stat mem.consumed.average,mem.bandwidth*,mem.missrate.latest,cpu.demand.average -Memory -Cpu -Disk -Network -Realtime -Start $start | Select-Object Timestamp,Entity,MetricId,Instance,Value,Unit
+        $stats = Get-Stat -Entity $Entity -Stat mem.*,cpu.demand.average -Memory -Cpu -Disk -Network -Realtime -Start $start | Select-Object Timestamp,Entity,MetricId,Instance,Value,Unit
 
 	    # Create the name with a timestamp (Windows Pathing)
 	    $time = (Get-Date $stats[0].Timestamp -format u).Replace(':','.').Replace(' ','_')
