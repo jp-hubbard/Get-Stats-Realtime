@@ -12,7 +12,7 @@
   and network.
 
  .Parameter Entity
-  Fully qualified domain name (FQDN) or IP address of a vSphere host.
+  Fully qualified domain name (FQDN) or IP address of a vSphere host. May also provide a comma seperated list without spaces contained in double quotes. (i.e. "host1.example.com,host2.example.com")
 
  .Parameter Path
   The file path where results are exported. The file path must exist and assumes a 
@@ -52,27 +52,52 @@ function Get-Stats-Realtime {
         write-host $status -ForegroundColor white
     } # End function status
 
+    # Check for multiple entities
+    if ($entity -match ',') {
+        $entities = $entity -Split ','
+    }
+
     # Start the loop and end when elapsed time is greater than the duation
     $elapsed=0
     while ($elapsed -lt ($Duration + 1)) {
+        if ($entities) {
+            foreach ($entity in $entities)  {
+                # Subtract the Period from the current time to identify start range of time to retrieve stats
+                $start = (Get-Date) - [timespan]::fromseconds($Period)
+                
+                # Get the statistics with the VMware Cmdlet
+                Status "Getting Realtime Stats" "$start $Entity"
+                Status "Status" "$elapsed/$Duration elapsed/Duration in seconds"
+                             
+                # Retrieve all statistics
+                $stats = Get-Stat -Entity $Entity -Stat mem.*,cpu.demand.average -Memory -Cpu -Disk -Network -Realtime -Start $start | Select-Object Timestamp,Entity,MetricId,Instance,Value,Unit
 
-        # Subtract the Period from the current time to identify start range of time to retrieve stats
-        $start = (Get-Date) - [timespan]::fromseconds($Period)
+                # Create the name with a timestamp (Windows Pathing)
+                $time = (Get-Date $stats[0].Timestamp -format u).Replace(':','.').Replace(' ','_')
+                $name = "$Path\realtime-" + $time + '.csv'
+
+                # Export the statistics to a CSV file 
+                Status "Exporting Realtime Stats for $entity" "$name"
+            } # End foreach
+
+        } else {
+            # Subtract the Period from the current time to identify start range of time to retrieve stats
+            $start = (Get-Date) - [timespan]::fromseconds($Period)
+
+            # Get the statistics with the VMware Cmdlet
+            Status "Getting Realtime Stats" "$start $Entity"
+            Status "Status" "$elapsed/$Duration elapsed/Duration in seconds"
+            # Retrieve all statistics
+            $stats = Get-Stat -Entity $Entity -Stat mem.*,cpu.demand.average -Memory -Cpu -Disk -Network -Realtime -Start $start | Select-Object Timestamp,Entity,MetricId,Instance,Value,Unit
+
+            # Create the name with a timestamp (Windows Pathing)
+            $time = (Get-Date $stats[0].Timestamp -format u).Replace(':','.').Replace(' ','_')
+            $name = "$Path\realtime-" + $time + '.csv'
+
+            # Export the statistics to a CSV file 
+            Status "Exporting Realtime Stats" "$name"
+        } # End if entities
         
-        # Get the statistics with the VMware Cmdlet
-        Status "Getting Realtime Stats" "$start $Entity"
-        Status "Status" "$elapsed/$Duration elapsed/Duration in seconds"
-        # Retrieve all statistics
-        $stats = Get-Stat -Entity $Entity -Stat mem.*,cpu.demand.average -Memory -Cpu -Disk -Network -Realtime -Start $start | Select-Object Timestamp,Entity,MetricId,Instance,Value,Unit
-
-	    # Create the name with a timestamp (Windows Pathing)
-	    $time = (Get-Date $stats[0].Timestamp -format u).Replace(':','.').Replace(' ','_')
-	    $name = "$Path\realtime-" + $time + '.csv'
-
-        # Export the statistics to a CSV file 
-        Status "Exporting Realtime Stats" "$name"
-	    $stats | Export-CSV -NoTypeInformation $name
-
         # Increment the elapsed time and sleep until next loop
         Status "Sleeping" "$Period seconds"
         Start-Sleep $Period
