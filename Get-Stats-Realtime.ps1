@@ -78,6 +78,7 @@ function Get-Stats-Realtime {
 
                 # Export the statistics to a CSV file 
                 Status "Exporting Realtime Stats for $entity" "$name"
+                $stats | Export-CSV -NoTypeInformation $name -Append
             } # End foreach
 
         } else {
@@ -96,6 +97,7 @@ function Get-Stats-Realtime {
 
             # Export the statistics to a CSV file 
             Status "Exporting Realtime Stats" "$name"
+            $stats | Export-CSV -NoTypeInformation $name
         } # End if entities
         
         # Increment the elapsed time and sleep until next loop
