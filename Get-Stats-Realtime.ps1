@@ -79,6 +79,14 @@ function Get-Stats-Realtime {
                 # Export the statistics to a CSV file 
                 Status "Exporting Realtime Stats for $entity" "$name"
                 $stats | Export-CSV -NoTypeInformation $name -Append
+                
+                # Verify export succeeded (at least the first one of multiple intended appends)
+                if (!(Test-Path $name)) {
+                    Status "Export Failed" "The path ($name) does not exist."
+                    Status "Get-Stats-Realtime" "Halting, unable to export stats to CSV."
+                    break; break; break
+                } 
+
             } # End foreach
 
         } else {
@@ -98,6 +106,13 @@ function Get-Stats-Realtime {
             # Export the statistics to a CSV file 
             Status "Exporting Realtime Stats" "$name"
             $stats | Export-CSV -NoTypeInformation $name
+
+            # Verify export succeeded
+            if (!(Test-Path $name)) {
+                Status "Export Failed" "The path ($name) does not exist."
+                Status "Get-Stats-Realtime" "Halting, unable to export stats to CSV."
+                break; break; break
+            } 
         } # End if entities
         
         # Increment the elapsed time and sleep until next loop
